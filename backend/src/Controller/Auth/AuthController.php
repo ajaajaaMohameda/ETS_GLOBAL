@@ -29,8 +29,10 @@ final readonly class AuthController
 
         $user = $this->authService->register($dto);
 
+        $response = $this->userMapper->toResponse($user);
+
         return new JsonResponse(
-            $this->userMapper->toResponse($user),
+            $this->serializer->normalize($response),
             Response::HTTP_CREATED
         );
     }
