@@ -22,11 +22,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ODM\Field(type: 'string')]
     private string $password;
 
+    #[ODM\Field(type: 'collection')]
+    private array $roles = [];
     public function __construct(string $name, string $email, string $password)
     {
         $this->name = trim($name);
         $this->email = strtolower(trim($email));
         $this->password = $password;
+
+        $this->roles = ['ROLE_USER'];
     }
 
     public function getId(): ?string
@@ -41,7 +45,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return ['ROLE_USER'];
+            return array_unique($this->roles);
+
     }
 
     public function eraseCredentials(): void
@@ -72,5 +77,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getEmail(): string
     {
         return $this->email;
+    }
+
+    public function promoteToAdmin(): void
+    {
+        if (!in_array('ROLE_ADMIN', $this->roles, true)) {
+            $this->roles[] = 'ROLE_ADMIN';
+        }
     }
 }

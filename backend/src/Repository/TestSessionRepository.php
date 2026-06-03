@@ -18,10 +18,14 @@ final readonly class TestSessionRepository
         $this->documentManager->flush();
     }
 
-    public function findById(string $id): ?TestSession
-    {
+    public function findActiveById(
+        string $id
+    ): ?TestSession {
         return $this->documentManager
             ->getRepository(TestSession::class)
-            ->find($id);
+            ->findOneBy([
+                'id' => $id,
+                'isDeleted' => false,
+            ]);
     }
 }

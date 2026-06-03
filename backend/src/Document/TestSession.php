@@ -63,7 +63,22 @@ class TestSession
 
     public function delete(): void
     {
+        if ($this->isDeleted) {
+            return;
+        }
+
         $this->isDeleted = true;
         $this->deletedAt = new \DateTimeImmutable();
     }
+
+    public function isDeleted(): bool
+{
+    return $this->isDeleted;
+}
+
+public function getDeletedAt(): ?\DateTimeImmutable
+{
+    return $this->deletedAt;
+}
+
 }

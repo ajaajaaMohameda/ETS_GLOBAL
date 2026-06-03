@@ -29,4 +29,18 @@ final readonly class SessionService
 
         return $session;
     }
+
+    public function delete(string $id): void
+    {
+        $session = $this->repository
+            ->findActiveById($id);
+
+        if (!$session) {
+            throw new SessionNotFoundException();
+        }
+
+        $session->delete();
+
+        $this->repository->save($session);
+    }
 }
