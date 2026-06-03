@@ -8,10 +8,16 @@ use App\Repository\TestSessionRepository;
 use App\DTO\Session\UpdateSessionRequest;
 use App\Exception\SessionNotFoundException;
 
+use App\DTO\Common\PaginationRequest;
+use App\DTO\Common\PaginationResponse;
+use App\DTO\Common\PaginatedResponse;
+use App\Mapper\SessionMapper;
+
 final readonly class SessionService
 {
     public function __construct(
         private TestSessionRepository $repository,
+        private SessionMapper $sessionMapper,
     ) {
     }
 
@@ -71,4 +77,34 @@ final readonly class SessionService
     }
     
 
+    public function getPaginated(
+        PaginationRequest $pagination
+    ): PaginatedResponse {
+
+        $sessions = $this->repository
+            ->findPaginated($pagination);
+
+        $total = $this->repository
+            ->countActive();
+
+        $pages = (int) ceil(
+            $total / $pagination->limit
+        );
+
+    $sessionResponses = array_map(
+        fn(TestSession $session)
+            => $this->sessionMapper->toResponse($session),
+        $sessions
+    );
+        return new PaginatedResponse(
+            data: $sessionResponses,
+            pagination: new PaginationResponse(
+                page: $pagination->page,
+                limit: $pagination->limit,
+                total: $total,
+                pages: $pages
+            )
+        );
+    }
+    
 }

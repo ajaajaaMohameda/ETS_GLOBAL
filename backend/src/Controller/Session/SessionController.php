@@ -73,4 +73,31 @@ final readonly class SessionController
             Response::HTTP_OK
         );
     }
+
+
+
+    #[Route('/api/sessions', methods: ['GET'])]
+    public function list(
+        Request $request
+    ): JsonResponse {
+
+        $pagination = new PaginationRequest(
+            page: max(
+                1,
+                $request->query->getInt('page', 1)
+            ),
+            limit: min(
+                100,
+                $request->query->getInt('limit', 10)
+            )
+        );
+
+        $result = $this->sessionService
+            ->getPaginated($pagination);
+
+        return new JsonResponse(
+            $this->serializer->normalize($result),
+            Response::HTTP_OK
+        );
+    }
 }
