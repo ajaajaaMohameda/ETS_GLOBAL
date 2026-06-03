@@ -25,6 +25,11 @@ class TestSession
     #[ODM\Field(type: 'int')]
     private int $availableSeats;
 
+    #[ODM\Field(type: 'bool')]
+    private bool $isDeleted = false;
+
+    #[ODM\Field(type: 'date_immutable', nullable: true)]
+    private ?\DateTimeImmutable $deletedAt = null;
     public function __construct(
         string $language,
         \DateTimeImmutable $startsAt,
@@ -56,4 +61,9 @@ class TestSession
         }
     }
 
+    public function delete(): void
+    {
+        $this->isDeleted = true;
+        $this->deletedAt = new \DateTimeImmutable();
+    }
 }
