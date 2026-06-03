@@ -100,7 +100,7 @@ final readonly class SessionController
             Response::HTTP_OK
         );
     }
-    
+
     #[Route('/api/sessions/{id}', methods: ['GET'])]
     public function get(
         string $id
@@ -115,6 +115,22 @@ final readonly class SessionController
         return new JsonResponse(
             $this->serializer->normalize($response),
             Response::HTTP_OK
+        );
+    }
+
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/api/sessions/{id}', methods: ['DELETE'])]
+    public function delete(
+        string $id
+    ): JsonResponse {
+
+        $this->sessionService
+            ->delete($id);
+
+        return new JsonResponse(
+            null,
+            Response::HTTP_NO_CONTENT
         );
     }
     }
