@@ -28,4 +28,30 @@ final readonly class TestSessionRepository
                 'isDeleted' => false,
             ]);
     }
+
+
+    public function findPaginated(
+        int $page,
+        int $limit
+    ): array
+    {
+        return $this->documentManager
+            ->createQueryBuilder(TestSession::class)
+            ->field('isDeleted')->equals(false)
+            ->skip(($page - 1) * $limit)
+            ->limit($limit)
+            ->getQuery()
+            ->execute()
+            ->toArray();
+    }
+
+    public function countActive(): int
+    {
+        return $this->documentManager
+            ->createQueryBuilder(TestSession::class)
+            ->field('isDeleted')->equals(false)
+            ->count()
+            ->getQuery()
+            ->execute();
+    }
 }
