@@ -14,6 +14,7 @@ final readonly class AuthController
     public function __construct(
         private AuthService $authService,
         private SerializerInterface $serializer,
+        private UserMapper $userMapper,
     ) {
     }
 
@@ -28,10 +29,9 @@ final readonly class AuthController
 
         $user = $this->authService->register($dto);
 
-        return new JsonResponse([
-            'id' => $user->getId(),
-            'name' => $user->getName(),
-            'email' => $user->getEmail(),
-        ], 201);
+        return new JsonResponse(
+            $this->userMapper->toResponse($user),
+            Response::HTTP_CREATED
+        );
     }
 }
