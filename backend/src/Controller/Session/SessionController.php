@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
+use App\DTO\Session\UpdateSessionRequest;
+
 
 final readonly class SessionController
 {
@@ -44,6 +46,31 @@ final readonly class SessionController
         return new JsonResponse(
             $this->serializer->normalize($response),
             Response::HTTP_CREATED
+        );
+    }
+
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/api/sessions/{id}', methods: ['PATCH'])]
+    public function update(
+        string $id,
+        Request $request
+    ): JsonResponse {
+        $dto = $this->serializer->deserialize(
+            $request->getContent(),
+            UpdateSessionRequest::class,
+            'json'
+        );
+
+        $this->dtoValidator->validate($dto);
+
+        $session = $this->sessionService->update($id, $dto);
+
+        $response = $this->sessionMapper->toResponse($session);
+
+        return new JsonResponse(
+            $this->serializer->normalize($response),
+            Response::HTTP_OK
         );
     }
 }

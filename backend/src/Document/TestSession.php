@@ -81,4 +81,39 @@ public function getDeletedAt(): ?\DateTimeImmutable
     return $this->deletedAt;
 }
 
+  public function update(
+        ?string $language,
+        ?\DateTimeImmutable $startsAt,
+        ?string $location,
+        ?int $capacity
+    ): void {
+        if ($language !== null) {
+            $this->language = trim($language);
+        }
+
+        if ($startsAt !== null) {
+            $this->startsAt = $startsAt;
+        }
+
+        if ($location !== null) {
+            $this->location = trim($location);
+        }
+
+        if ($capacity !== null) {
+
+            $reservedSeats =
+                $this->capacity - $this->availableSeats;
+
+            if ($capacity < $reservedSeats) {
+                throw new InvalidSessionCapacityException();
+            }
+
+            $this->availableSeats += (
+                $capacity - $this->capacity
+            );
+
+            $this->capacity = $capacity;
+        }
+    }
+
 }
