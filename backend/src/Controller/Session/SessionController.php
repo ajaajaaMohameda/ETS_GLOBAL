@@ -100,4 +100,21 @@ final readonly class SessionController
             Response::HTTP_OK
         );
     }
-}
+    
+    #[Route('/api/sessions/{id}', methods: ['GET'])]
+    public function get(
+        string $id
+    ): JsonResponse {
+
+        $session = $this->sessionService
+            ->getById($id);
+
+        $response = $this->sessionMapper
+            ->toResponse($session);
+
+        return new JsonResponse(
+            $this->serializer->normalize($response),
+            Response::HTTP_OK
+        );
+    }
+    }

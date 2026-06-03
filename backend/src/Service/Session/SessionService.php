@@ -106,5 +106,19 @@ final readonly class SessionService
             )
         );
     }
+
+    public function getById(
+        string $id
+    ): TestSession {
+
+        $session = $this->repository
+            ->findActiveById($id);
+
+        if (!$session) {
+            throw new SessionNotFoundException();
+        }
+
+        return $session;
+    }
     
 }
