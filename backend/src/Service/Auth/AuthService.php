@@ -37,8 +37,7 @@ final readonly class AuthService
 
         $user->changePassword($hashedPassword);
 
-        $this->documentManager->persist($user);
-        $this->documentManager->flush();
+        $this->userRepository->save($user);
 
         return $user;
     }

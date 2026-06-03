@@ -20,4 +20,10 @@ final readonly class UserRepository
                 'email' => strtolower(trim($email)),
             ]);
     }
+
+    public function save(User $user): void
+    {
+        $this->documentManager->persist($user);
+        $this->documentManager->flush();
+    }
 }
