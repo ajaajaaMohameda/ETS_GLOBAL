@@ -116,4 +116,23 @@ public function getDeletedAt(): ?\DateTimeImmutable
         }
     }
 
+    public function reserveSeat(): void
+    {
+        if ($this->availableSeats <= 0) {
+            throw new NoAvailableSeatsException();
+        }
+
+        $this->availableSeats--;
+    }
+
+
+    public function releaseSeat(): void
+    {
+        if (
+            $this->availableSeats
+            < $this->capacity
+        ) {
+            $this->availableSeats++;
+        }
+    }
 }
