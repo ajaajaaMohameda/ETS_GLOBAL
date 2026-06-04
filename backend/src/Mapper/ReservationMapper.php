@@ -3,9 +3,9 @@
 namespace App\Mapper;
 
 use App\Document\Reservation;
-use App\Dto\ReservationResponse;
+use App\DTO\Reservation\ReservationResponse;
 
-final readonly class ReservationMapper
+readonly class ReservationMapper
 {
     /**
      * @param Reservation[] $reservations
@@ -27,11 +27,10 @@ final readonly class ReservationMapper
             id: $reservation->getId(),
             sessionId: $session->getId(),
             language: $session->getLanguage(),
-            date: $session->getDate()->format('Y-m-d'),
-            time: $session->getTime(),
             location: $session->getLocation(),
-            reservedAt: $reservation->getReservedAt()->format(\DateTimeInterface::ATOM),
-            isCancelled: $reservation->isCancelled()
+            reservedAt: $reservation->getReservedAt()->format(\DateTimeInterface::ATOM)
         );
     }
+
+
 }

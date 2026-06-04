@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Document\User;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
-final readonly class UserRepository
+readonly class UserRepository
 {
     public function __construct(
         private DocumentManager $documentManager,

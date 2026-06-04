@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\DTO\Session\UpdateSessionRequest;
-
+use App\DTO\Common\PaginationRequest;
 
 final readonly class SessionController
 {

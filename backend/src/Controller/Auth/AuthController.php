@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\Mapper\UserMapper;
-
+use Symfony\Component\HttpFoundation\Response;
 final readonly class AuthController
 {
     public function __construct(

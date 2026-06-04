@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\Validator\DtoValidator;
+use Symfony\Component\HttpFoundation\Request;
+use App\DTO\Profile\UpdateProfileRequest;
 final readonly class ProfileController
 {
     public function __construct(

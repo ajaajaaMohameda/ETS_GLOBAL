@@ -7,7 +7,7 @@ use App\Document\TestSession;
 use App\Document\User;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
-final readonly class ReservationRepository
+readonly class ReservationRepository
 {
     public function __construct(
         private DocumentManager $documentManager

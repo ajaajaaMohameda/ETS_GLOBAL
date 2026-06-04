@@ -3,6 +3,7 @@
 namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as ODM;
+use App\Exception\NoAvailableSeatsException;
 
 #[ODM\Document(collection: 'sessions')]
 class TestSession
@@ -30,6 +31,7 @@ class TestSession
 
     #[ODM\Field(type: 'date_immutable', nullable: true)]
     private ?\DateTimeImmutable $deletedAt = null;
+
     public function __construct(
         string $language,
         \DateTimeImmutable $startsAt,
@@ -72,16 +74,16 @@ class TestSession
     }
 
     public function isDeleted(): bool
-{
-    return $this->isDeleted;
-}
+    {
+        return $this->isDeleted;
+    }
 
-public function getDeletedAt(): ?\DateTimeImmutable
-{
-    return $this->deletedAt;
-}
+    public function getDeletedAt(): ?\DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
 
-  public function update(
+    public function update(
         ?string $language,
         ?\DateTimeImmutable $startsAt,
         ?string $location,
@@ -100,18 +102,13 @@ public function getDeletedAt(): ?\DateTimeImmutable
         }
 
         if ($capacity !== null) {
-
-            $reservedSeats =
-                $this->capacity - $this->availableSeats;
+            $reservedSeats = $this->capacity - $this->availableSeats;
 
             if ($capacity < $reservedSeats) {
                 throw new InvalidSessionCapacityException();
             }
 
-            $this->availableSeats += (
-                $capacity - $this->capacity
-            );
-
+            $this->availableSeats += ($capacity - $this->capacity);
             $this->capacity = $capacity;
         }
     }
@@ -125,14 +122,46 @@ public function getDeletedAt(): ?\DateTimeImmutable
         $this->availableSeats--;
     }
 
-
     public function releaseSeat(): void
     {
-        if (
-            $this->availableSeats
-            < $this->capacity
-        ) {
+        if ($this->availableSeats < $this->capacity) {
             $this->availableSeats++;
         }
+    }
+
+    // ==========================================
+    // GETTERS
+    // ==========================================
+
+    public function getId(): ?string
+    {
+        return $this->id;
+    }
+
+    public function getLanguage(): string
+    {
+        return $this->language;
+    }
+
+    // AJOUT : Getter pour la date de début de session
+    public function getStartsAt(): \DateTimeImmutable
+    {
+        return $this->startsAt;
+    }
+
+    // AJOUT : Getter pour le lieu
+    public function getLocation(): string
+    {
+        return $this->location;
+    }
+
+    public function getCapacity(): int
+    {
+        return $this->capacity;
+    }
+
+    public function getAvailableSeats(): int
+    {
+        return $this->availableSeats;
     }
 }

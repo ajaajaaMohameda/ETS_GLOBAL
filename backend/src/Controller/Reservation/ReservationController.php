@@ -1,17 +1,19 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Reservation;
 
-use App\Dto\CreateReservationRequest;
+use App\DTO\Reservation\CreateReservationRequest;
 use App\Mapper\ReservationMapper;
-use App\Service\ReservationService;
-use App\Service\CurrentUserProvider;
+use App\Service\Reservation\ReservationService;
 use App\Validator\DtoValidator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Routing\Attribute\Route;
+use App\Security\CurrentUserProvider;
+use App\DTO\Common\PaginationRequest;
+
 
 #[Route('/api/reservations')]
 final readonly class ReservationController
@@ -30,8 +32,15 @@ final readonly class ReservationController
     {
         $user = $this->currentUserProvider->getUser();
         
-        /** @var CreateReservationRequest $dto */
-        $dto = $this->dtoValidator->deserializeAndValidate($request->getContent(), CreateReservationRequest::class);
+         $dto = $this->serializer->deserialize(
+            $request->getContent(),
+            CreateReservationRequest::class,
+            'json'
+        );
+
+       $this->dtoValidator->validate($dto);
+
+      
 
         $reservation = $this->reservationService->createReservation($user, $dto);
         $responseBody = $this->reservationMapper->mapToResponse($reservation);
@@ -41,16 +50,24 @@ final readonly class ReservationController
         return new JsonResponse($json, Response::HTTP_CREATED, [], true);
     }
 
+
     #[Route('', name: 'api_reservations_list', methods: ['GET'])]
-    public function list(): JsonResponse
+    public function list(Request $request): JsonResponse
     {
-        $user = $this->currentUserProvider->getUser();
-        $reservations = $this->reservationService->getUserReservations($user);
-        $responseBody = $this->reservationMapper->mapToResponseList($reservations);
+        $pagination = new PaginationRequest(
+            page: max(1, $request->query->getInt('page', 1)),
+            limit: min(100, $request->query->getInt('limit', 10))
+        );
 
-        $json = $this->serializer->serialize($responseBody, 'json');
+        $result = $this->reservationService->getUserReservationsPaginated(
+            $this->currentUserProvider->getUser(),
+            $pagination
+        );
 
-        return new JsonResponse($json, Response::HTTP_OK, [], true);
+        return new JsonResponse(
+            $this->serializer->normalize($result),
+            Response::HTTP_OK
+        );
     }
 
     #[Route('/{id}', name: 'api_reservations_cancel', methods: ['DELETE'])]

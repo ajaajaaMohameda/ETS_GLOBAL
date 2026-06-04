@@ -1,0 +1,2 @@
+_lexik_jwt_authentication_login_check:
+    path: /api/login_check

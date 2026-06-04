@@ -85,4 +85,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             $this->roles[] = 'ROLE_ADMIN';
         }
     }
+
+ public function setRoles(array $roles): self
+{
+    $this->roles = $roles;
+    return $this;
+}
 }

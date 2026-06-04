@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Reservation;
 
 use App\Document\Reservation;
 use App\Document\User;
-use App\Dto\CreateReservationRequest;
+use App\DTO\Reservation\CreateReservationRequest;
 use App\Exception\NoAvailableSeatsException;
 use App\Exception\ReservationAlreadyExistsException;
 use App\Exception\ReservationNotFoundException;
@@ -12,21 +12,28 @@ use App\Exception\SessionNotFoundException;
 use App\Exception\UnauthorizedReservationAccessException;
 use App\Repository\ReservationRepository;
 use App\Repository\TestSessionRepository;
+use App\Security\CurrentUserProvider;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use App\Mapper\ReservationMapper;
+use App\DTO\Common\PaginationRequest;
+use App\DTO\Common\PaginatedResponse;
+use App\DTO\Common\PaginationResponse;
 
-final readonly class ReservationService
+
+ readonly class ReservationService
 {
     public function __construct(
         private ReservationRepository $reservationRepository,
         private TestSessionRepository $sessionRepository, // Injecté pour pouvoir persister la session
-        private DocumentManager $documentManager
+        private DocumentManager $documentManager,
+        private ReservationMapper $reservationMapper
     ) {
     }
 
     public function createReservation(User $user, CreateReservationRequest $request): Reservation
     {
 
-        $session = $this->sessionRepository->findById($request->sessionId);
+        $session = $this->sessionRepository->findActiveById($request->sessionId);
         
         if (!$session || (method_exists($session, 'isDeleted') && $session->isDeleted())) {
             throw new SessionNotFoundException();
@@ -60,7 +67,7 @@ final readonly class ReservationService
 
     public function cancelReservation(User $user, string $id): void
     {
-        $reservation = $this->reservationRepository->findById($id);
+        $reservation = $this->reservationRepository->findActiveById($id);
 
         if (!$reservation || $reservation->isCancelled()) {
             throw new ReservationNotFoundException();
@@ -83,5 +90,44 @@ final readonly class ReservationService
         $this->documentManager->persist($reservation);
 
         $this->documentManager->flush();
+    }
+
+
+    public function getUserReservationsPaginated(User $user, PaginationRequest $pagination): PaginatedResponse
+    {
+        $reservations = $this->documentManager
+            ->createQueryBuilder(Reservation::class)
+            ->field('user')->references($user)
+            ->field('isCancelled')->equals(false)
+            ->skip(($pagination->page - 1) * $pagination->limit)
+            ->limit($pagination->limit)
+            ->getQuery()
+            ->execute()
+            ->toArray();
+
+        $total = $this->documentManager
+            ->createQueryBuilder(Reservation::class)
+            ->field('user')->references($user)
+            ->field('isCancelled')->equals(false)
+            ->count()
+            ->getQuery()
+            ->execute();
+
+        $pages = (int) ceil($total / $pagination->limit);
+
+        $reservationResponses = array_map(
+            fn(Reservation $reservation) => $this->reservationMapper->mapToResponse($reservation),
+            $reservations
+        );
+
+        return new PaginatedResponse(
+            data: $reservationResponses,
+            pagination: new PaginationResponse(
+                page: $pagination->page,
+                limit: $pagination->limit,
+                total: $total,
+                pages: $pages
+            )
+        );
     }
 }

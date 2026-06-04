@@ -4,8 +4,8 @@ namespace App\Repository;
 
 use App\Document\TestSession;
 use Doctrine\ODM\MongoDB\DocumentManager;
-
-final readonly class TestSessionRepository
+use App\DTO\Common\PaginationRequest;
+readonly class TestSessionRepository
 {
     public function __construct(
         private DocumentManager $documentManager,
@@ -30,11 +30,13 @@ final readonly class TestSessionRepository
     }
 
 
-    public function findPaginated(
-        int $page,
-        int $limit
+
+
+    public function findPaginated(PaginationRequest $pagination
     ): array
     {
+            $page = $pagination->page;
+    $limit = $pagination->limit;
         return $this->documentManager
             ->createQueryBuilder(TestSession::class)
             ->field('isDeleted')->equals(false)
