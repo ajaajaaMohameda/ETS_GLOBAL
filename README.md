@@ -41,7 +41,7 @@
 ### Démarrer en une commande
 
 ```bash
-git clone <LIEN_DE_TON_DEPOT_GITHUB>
+git clone https://github.com/ajaajaaMohameda/ETS_GLOBAL.git
 cd ETS_GLOBAL
 docker-compose up -d --build
 ```
