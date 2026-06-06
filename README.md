@@ -91,14 +91,13 @@ docker-compose exec frontend npm run test
 Pour faciliter l'évaluation, les variables d'environnement (secrets JWT, URL MongoDB) ont été versionnées et les clés asymétriques JWT sont générées automatiquement au démarrage du conteneur. En production l'approche serait différente :
 
 **JWT**
-- Token stocké dans un cookie `HttpOnly` plutôt que `localStorage` pour prévenir les attaques XSS
 - Refresh token via `GesdinetJWTRefreshTokenBundle` pour éviter les reconnexions forcées
 - Blacklist des tokens à la déconnexion (actuellement un token reste valide jusqu'à expiration)
 
 **API**
 - Rate limiting sur `/api/login` et `/api/register` pour prévenir le brute force
 - CORS restreint aux origines autorisées uniquement
-- Validation stricte des ObjectId MongoDB pour éviter les injections
+
 
 **Mots de passe**
 - Hachage bcrypt via Symfony Security déjà en place
@@ -112,7 +111,7 @@ Pour faciliter l'évaluation, les variables d'environnement (secrets JWT, URL Mo
 **Infrastructure**
 - Les secrets (`.env.local`, clés `.pem`) seraient exclus du dépôt via `.gitignore`
 - Gestion des secrets via Vault ou GitHub Secrets
-- HTTPS géré par le reverse proxy en production
+
 
 ---
 
