@@ -9,6 +9,11 @@ services:
     volumes:
       - mongodb_data:/data/db
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -25,8 +30,9 @@ services:
       - MONGODB_DB=ets_global
       - JWT_PASSPHRASE=ets_global_2026_secret
     depends_on:
-      - mongodb
-    command: sh -c "php bin/console lexik:jwt:generate-keypair --skip-if-exists && php -S 0.0.0.0:8000 -t public"
+      mongodb:
+        condition: service_healthy
+    command: sh -c "php bin/console lexik:jwt:generate-keypair --skip-if-exists && php bin/console doctrine:mongodb:fixtures:load --no-interaction && php -S 0.0.0.0:8000 -t public"
 
   frontend:
     build:
