@@ -74,8 +74,13 @@ docker-compose exec frontend npm run test
 | `POST` | `/api/register` | Inscription | Non |
 | `POST` | `/api/login` | Connexion, retourne un JWT | Non |
 | `GET` | `/api/sessions` | Liste des sessions disponibles | Oui |
+| `POST` | `/api/sessions` | Créer une session | Oui |
+| `GET` | `/api/sessions/{id}` | Détail d'une session | Oui |
+| `PATCH` | `/api/sessions/{id}` | Modifier une session | Oui |
+| `DELETE` | `/api/sessions/{id}` | Supprimer une session | Oui |
 | `POST` | `/api/reservations` | Réserver une session | Oui |
 | `DELETE` | `/api/reservations/{id}` | Annuler une réservation | Oui |
+| `GET` | `/api/reservations` | Liste des réservations de l'utilisateur | Oui |
 | `GET` | `/api/profile` | Consulter son profil | Oui |
 | `PUT` | `/api/profile` | Mettre à jour son profil | Oui |
 
@@ -83,17 +88,38 @@ docker-compose exec frontend npm run test
 
 ## Note sur la sécurité
 
-Pour faciliter l'évaluation du projet, les variables d'environnement (secrets JWT, URL MongoDB) ont été versionnées et les clés asymétriques JWT sont générées automatiquement au démarrage du conteneur.
+Pour faciliter l'évaluation, les variables d'environnement (secrets JWT, URL MongoDB) ont été versionnées et les clés asymétriques JWT sont générées automatiquement au démarrage du conteneur. En production l'approche serait différente :
 
-**En production :**
-- Les fichiers sensibles (`.env.local`, clés `.pem`) seraient exclus du dépôt via `.gitignore`
-- Les secrets seraient gérés via un outil dédié (Vault, GitHub Secrets, etc.)
+**JWT**
+- Token stocké dans un cookie `HttpOnly` plutôt que `localStorage` pour prévenir les attaques XSS
+- Refresh token via `GesdinetJWTRefreshTokenBundle` pour éviter les reconnexions forcées
+- Blacklist des tokens à la déconnexion (actuellement un token reste valide jusqu'à expiration)
+
+**API**
+- Rate limiting sur `/api/login` et `/api/register` pour prévenir le brute force
+- CORS restreint aux origines autorisées uniquement
+- Validation stricte des ObjectId MongoDB pour éviter les injections
+
+**Mots de passe**
+- Hachage bcrypt via Symfony Security déjà en place
+- Politique de complexité à ajouter côté frontend
+- Fonctionnalité "mot de passe oublié" via Symfony Mailer
+
+**Rôles**
+- Actuellement tout utilisateur authentifié peut accéder au CRUD sessions
+- En production : `ROLE_ADMIN` sur les routes de mutation via `#[IsGranted('ROLE_ADMIN')]`
+
+**Infrastructure**
+- Les secrets (`.env.local`, clés `.pem`) seraient exclus du dépôt via `.gitignore`
+- Gestion des secrets via Vault ou GitHub Secrets
+- HTTPS géré par le reverse proxy en production
 
 ---
 
 ## Pistes d'évolution
 
-- **Refresh Token** — intégrer `GesdinetJWTRefreshTokenBundle` pour renouveler les tokens sans déconnecter l'utilisateur
-- **Interface Admin** — espace `ROLE_ADMIN` pour gérer le catalogue de sessions
-- **Gestion des rôles** — distinction `ROLE_USER` / `ROLE_ADMIN` via `security.yaml` ou `#[IsGranted]`
+- **Notifications email** — confirmation de réservation et rappel avant la session via Symfony Mailer
+- **Recherche et filtrage** — filtrer les sessions par langue, date ou lieu
+- **Liste d'attente** — s'inscrire quand une session est complète
+- **Interface Admin** — tableau de bord pour gérer le catalogue de sessions
 - **Observabilité** — logging Monolog (backend) et Sentry (frontend)
