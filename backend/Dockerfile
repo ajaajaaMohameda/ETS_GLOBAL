@@ -17,4 +17,8 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-CMD ["php-fpm"]
+COPY . .
+
+RUN composer install --no-interaction --optimize-autoloader --no-scripts
+
+CMD php bin/console doctrine:mongodb:fixtures:load --no-interaction && php -S 0.0.0.0:8000 -t public

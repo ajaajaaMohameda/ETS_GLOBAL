@@ -1,39 +1,47 @@
+version: '3.8'
+
 services:
+  mongodb:
+    image: mongo:latest
+    container_name: ets_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
 
   backend:
     build:
       context: ./backend
     container_name: ets_backend
-    working_dir: /var/www/html
-    volumes:
-      - ./backend:/var/www/html
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/var/www/html
+      - /var/www/html/vendor
+    environment:
+      - APP_ENV=dev
+      - MONGODB_URL=mongodb://mongodb:27017
+      - MONGODB_DB=ets_global
+      - JWT_PASSPHRASE=ets_global_2026_secret
     depends_on:
       - mongodb
-
-  mongodb:
-    image: mongo:8
-    container_name: ets_mongodb
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
+    command: sh -c "php bin/console lexik:jwt:generate-keypair --skip-if-exists && php -S 0.0.0.0:8000 -t public"
 
   frontend:
     build:
       context: ./frontend
     container_name: ets_frontend
-    working_dir: /app
+    ports:
+      - "3000:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    ports:
-      - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     depends_on:
       - backend
+    command: npm run dev
 
 volumes:
-  mongo_data:
+  mongodb_data:

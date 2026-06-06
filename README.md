@@ -1,44 +1,39 @@
-# 🌍 ETS EMEA — Application de Réservation de Sessions de Tests de Langues
+# ETS EMEA — Application de Réservation de Sessions de Tests de Langues
 
 > Test technique réalisé pour **ETS Global** — Application web Full-Stack découplée permettant la gestion et la réservation de sessions d'examens de langues.
 
 ---
 
-## ✅ Réponse au Cahier des Charges
+## Stack technique
 
-### Exigences techniques
-
-| Critère | Technologie | Statut |
-|---|---|---|
-| Backend API REST | Symfony 8 + PHP 8.4 | ✅ |
-| Base de données | MongoDB (NoSQL) | ✅ |
-| Frontend | Next.js 16 + Tailwind CSS | ✅ |
-| Authentification | JWT (stateless) | ✅ |
-| Environnement | Docker + Docker Compose | ✅ |
-
-### Exigences fonctionnelles
-
-- ✅ **Inscription / Connexion** — création de compte et authentification sécurisée par JWT
-- ✅ **Catalogue de sessions** — liste des sessions disponibles avec filtrage
-- ✅ **Réservation** — inscription à une session avec vérification et décrémentation des places
-- ✅ **Annulation** — possibilité pour l'utilisateur d'annuler une réservation existante
-- ✅ **Espace profil** — consultation et mise à jour des informations personnelles (nom, email)
-
-### Exigences de qualité
-
-- ✅ **Tests Backend** — tests d'intégration PHPUnit sur les endpoints critiques de l'API
-- ✅ **Tests Frontend** — tests de composants avec Jest et React Testing Library
+| Couche | Technologie |
+|---|---|
+| Backend | Symfony 8 + PHP 8.4 |
+| Frontend | Next.js 16 + Tailwind CSS |
+| Base de données | MongoDB |
+| Authentification | JWT (stateless) |
+| Environnement | Docker + Docker Compose |
 
 ---
 
-## 🛠️ Installation et lancement
+## Fonctionnalités
+
+- **Inscription / Connexion** — création de compte et authentification sécurisée par JWT
+- **Catalogue de sessions** — liste paginée des sessions disponibles
+- **Réservation** — inscription à une session avec vérification des places disponibles
+- **Annulation** — annulation d'une réservation existante
+- **Espace profil** — consultation et mise à jour des informations personnelles
+
+---
+
+## Installation
 
 ### Prérequis
 
 - [Docker](https://docs.docker.com/get-docker/) ≥ 24
 - [Docker Compose](https://docs.docker.com/compose/install/) ≥ 2
 
-### Démarrer en une commande
+### Lancement
 
 ```bash
 git clone https://github.com/ajaajaaMohameda/ETS_GLOBAL.git
@@ -46,38 +41,37 @@ cd ETS_GLOBAL
 docker-compose up -d --build
 ```
 
-### Accéder à l'application
+### URLs
 
 | Service | URL |
 |---|---|
-| Frontend (Next.js) | http://localhost:3000 |
-| Backend API (Symfony) | http://localhost:8000 |
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8000 |
 | MongoDB | localhost:27017 |
 
 ---
 
-## 🧪 Lancer les tests
+## Tests
 
-### Tests backend (PHPUnit)
+### Backend (PHPUnit)
 
 ```bash
-docker-compose exec backend ./vendor/bin/phpunit
+docker-compose exec -e APP_ENV=test backend ./vendor/bin/phpunit
 ```
 
-### Tests frontend (Jest)
+### Frontend (Jest)
 
 ```bash
 docker-compose exec frontend npm run test
 ```
 
+---
 
-
-
-## 📡 Principaux endpoints de l'API
+## API
 
 | Méthode | Route | Description | Auth |
 |---|---|---|---|
-| `POST` | `/api/register` | Inscription d'un nouvel utilisateur | Non |
+| `POST` | `/api/register` | Inscription | Non |
 | `POST` | `/api/login` | Connexion, retourne un JWT | Non |
 | `GET` | `/api/sessions` | Liste des sessions disponibles | Oui |
 | `POST` | `/api/reservations` | Réserver une session | Oui |
@@ -87,9 +81,19 @@ docker-compose exec frontend npm run test
 
 ---
 
-## 🔮 Évolutions prévues
+## Note sur la sécurité
 
-1. **Cookies HttpOnly** — stocker le JWT dans un cookie `HttpOnly` côté serveur pour prévenir les attaques XSS
-2. **Refresh Token** — intégrer `GesdinetJWTRefreshTokenBundle` pour renouveler les tokens sans déconnecter l'utilisateur
-3. **Interface Admin** — espace sécurisé (`ROLE_ADMIN`) pour créer, modifier et supprimer des sessions
-4. **Observabilité** — logging via Monolog (backend) et Sentry (frontend) pour monitorer les erreurs en production
+Pour faciliter l'évaluation du projet, les variables d'environnement (secrets JWT, URL MongoDB) ont été versionnées et les clés asymétriques JWT sont générées automatiquement au démarrage du conteneur.
+
+**En production :**
+- Les fichiers sensibles (`.env.local`, clés `.pem`) seraient exclus du dépôt via `.gitignore`
+- Les secrets seraient gérés via un outil dédié (Vault, GitHub Secrets, etc.)
+
+---
+
+## Pistes d'évolution
+
+- **Refresh Token** — intégrer `GesdinetJWTRefreshTokenBundle` pour renouveler les tokens sans déconnecter l'utilisateur
+- **Interface Admin** — espace `ROLE_ADMIN` pour gérer le catalogue de sessions
+- **Gestion des rôles** — distinction `ROLE_USER` / `ROLE_ADMIN` via `security.yaml` ou `#[IsGranted]`
+- **Observabilité** — logging Monolog (backend) et Sentry (frontend)

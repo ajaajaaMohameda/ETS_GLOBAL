@@ -25,7 +25,7 @@ final readonly class SessionController
     ) {
     }
 
-    #[IsGranted('ROLE_ADMIN')]
+   
     #[Route('/api/sessions', methods: ['POST'])]
     public function create(
         Request $request
@@ -50,7 +50,7 @@ final readonly class SessionController
     }
 
 
-    #[IsGranted('ROLE_ADMIN')]
+   
     #[Route('/api/sessions/{id}', methods: ['PATCH'])]
     public function update(
         string $id,
@@ -119,7 +119,7 @@ final readonly class SessionController
     }
 
 
-    #[IsGranted('ROLE_ADMIN')]
+   
     #[Route('/api/sessions/{id}', methods: ['DELETE'])]
     public function delete(
         string $id

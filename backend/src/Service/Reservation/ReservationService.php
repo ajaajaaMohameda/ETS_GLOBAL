@@ -34,24 +34,24 @@ use App\DTO\Common\PaginationResponse;
     {
 
         $session = $this->sessionRepository->findActiveById($request->sessionId);
-        
+
         if (!$session || (method_exists($session, 'isDeleted') && $session->isDeleted())) {
             throw new SessionNotFoundException();
         }
 
-    
+
         if ($this->reservationRepository->exists($user, $session)) {
             throw new ReservationAlreadyExistsException();
         }
- 
-        $session->reserveSeat(); 
 
-        $this->documentManager->persist($session); 
+        $session->reserveSeat();
+
+        $this->documentManager->persist($session);
 
         $reservation = new Reservation($user, $session);
         $this->reservationRepository->save($reservation); // Appelle persist() sur la réservation
-        
-  
+
+
         $this->documentManager->flush();
 
         return $reservation;
@@ -67,7 +67,7 @@ use App\DTO\Common\PaginationResponse;
 
     public function cancelReservation(User $user, string $id): void
     {
-        $reservation = $this->reservationRepository->findActiveById($id);
+        $reservation = $this->reservationRepository->findById($id, $user);
 
         if (!$reservation || $reservation->isCancelled()) {
             throw new ReservationNotFoundException();
@@ -78,9 +78,9 @@ use App\DTO\Common\PaginationResponse;
             throw new UnauthorizedReservationAccessException();
         }
 
- 
+
         $reservation->cancel();
-        
+
 
         $session = $reservation->getSession();
         $session->releaseSeat();

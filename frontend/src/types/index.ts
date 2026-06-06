@@ -16,14 +16,15 @@ export interface Session {
 
 export interface Reservation {
   id: string;
-  session: Session;
-  user: User;
-  createdAt: string;
+  sessionId: string;
+  language: string;
+  location: string;
+  reservedAt: string;
 }
 
 export interface PaginatedResponse<T> {
   data: T[];
-  meta: {
+  pagination: {
     total: number;
     page: number;
     limit: number;

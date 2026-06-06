@@ -99,7 +99,7 @@ export default function SessionsPage() {
         ))}
       </div>
 
-      {data && data.meta.pages > 1 && (
+      {data && data.pagination.pages > 1 && (
         <div className="flex items-center justify-between bg-white px-4 py-3 border-t border-gray-200 sm:px-6 rounded-lg shadow-sm mt-6">
           <div className="flex justify-between w-full">
             <button
@@ -110,11 +110,11 @@ export default function SessionsPage() {
               Précédent
             </button>
             <span className="text-sm text-gray-700 self-center">
-              Page <span className="font-medium">{data.meta.page}</span> sur <span className="font-medium">{data.meta.pages}</span>
+              Page <span className="font-medium">{data.pagination.page}</span> sur <span className="font-medium">{data.pagination.pages}</span>
             </span>
             <button
-              onClick={() => setPage(p => Math.min(data.meta.pages, p + 1))}
-              disabled={page === data.meta.pages}
+              onClick={() => setPage(p => Math.min(data.pagination.pages, p + 1))}
+              disabled={page === data.pagination.pages}
               className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
             >
               Suivant

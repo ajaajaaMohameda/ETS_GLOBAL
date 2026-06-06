@@ -22,14 +22,14 @@ const mockSessions = {
       startsAt: '2026-10-15T10:00:00Z',
       location: 'Centre Paris',
       capacity: 15,
-    }
+    },
   ],
-  meta: {
+  pagination: {
     total: 1,
     page: 1,
     limit: 6,
-    pages: 1
-  }
+    pages: 1,
+  },
 };
 
 describe('Page des Sessions Disponibles', () => {
@@ -52,6 +52,18 @@ describe('Page des Sessions Disponibles', () => {
     expect(screen.getByText('Centre Paris')).toBeInTheDocument();
   });
 
+  it('affiche une erreur si le chargement échoue', async () => {
+    (sessionService.getSessions as jest.Mock).mockRejectedValue(new Error('Network error'));
+
+    render(<SessionsPage />);
+
+    await waitFor(() => {
+      expect(
+          screen.getByText(/Erreur lors du chargement des sessions disponibles./i)
+      ).toBeInTheDocument();
+    });
+  });
+
   it('appelle le service de réservation au clic sur le bouton', async () => {
     (sessionService.getSessions as jest.Mock).mockResolvedValue(mockSessions);
     (reservationService.createReservation as jest.Mock).mockResolvedValue({ success: true });
@@ -66,9 +78,25 @@ describe('Page des Sessions Disponibles', () => {
     fireEvent.click(reserveButton);
 
     expect(reserveButton).toBeDisabled();
-    
+
     await waitFor(() => {
       expect(reservationService.createReservation).toHaveBeenCalledWith('65abc123');
     });
+  });
+
+  it('désactive le bouton si la session est complète', async () => {
+    (sessionService.getSessions as jest.Mock).mockResolvedValue({
+      ...mockSessions,
+      data: [{ ...mockSessions.data[0], capacity: 0 }],
+    });
+
+    render(<SessionsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('TOEIC')).toBeInTheDocument();
+    });
+
+    const completButton = screen.getByRole('button', { name: /complet/i });
+    expect(completButton).toBeDisabled();
   });
 });
